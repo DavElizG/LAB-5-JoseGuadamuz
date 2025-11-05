@@ -1,5 +1,5 @@
-var val = require('../libs/unalib');
-var assert = require('assert');
+const val = require('../libs/unalib');
+const assert = require('assert');
 
 
 describe('unalib', function(){
@@ -222,8 +222,8 @@ describe('unalib', function(){
 
     it('deberia bloquear script injection y devolver mensaje de seguridad', function(){
 
-      var maliciousMsg = JSON.stringify({nombre: 'Hacker', mensaje: '<script>alert("xss")</script>', color: '#000'});
-      var result = JSON.parse(val.validateMessage(maliciousMsg));
+      const maliciousMsg = JSON.stringify({nombre: 'Hacker', mensaje: '<script>alert("xss")</script>', color: '#000'});
+      const result = JSON.parse(val.validateMessage(maliciousMsg));
       
       assert.equal(result.mensaje, '⚠️ Contenido bloqueado por seguridad');
 
@@ -231,8 +231,8 @@ describe('unalib', function(){
 
     it('deberia procesar URLs de imagen correctamente', function(){
 
-      var imageMsg = JSON.stringify({nombre: 'User', mensaje: 'http://example.com/image.jpg', color: '#000'});
-      var result = JSON.parse(val.validateMessage(imageMsg));
+      const imageMsg = JSON.stringify({nombre: 'User', mensaje: 'http://example.com/image.jpg', color: '#000'});
+      const result = JSON.parse(val.validateMessage(imageMsg));
       
       assert.equal(result.mensaje.includes('<img'), true);
       assert.equal(result.mensaje.includes('http://example.com/image.jpg'), true);
@@ -241,8 +241,8 @@ describe('unalib', function(){
 
     it('deberia procesar URLs de video de YouTube correctamente', function(){
 
-      var videoMsg = JSON.stringify({nombre: 'User', mensaje: 'https://www.youtube.com/watch?v=qYwlqx-JLok', color: '#000'});
-      var result = JSON.parse(val.validateMessage(videoMsg));
+      const videoMsg = JSON.stringify({nombre: 'User', mensaje: 'https://www.youtube.com/watch?v=qYwlqx-JLok', color: '#000'});
+      const result = JSON.parse(val.validateMessage(videoMsg));
       
       assert.equal(result.mensaje.includes('<iframe'), true);
       assert.equal(result.mensaje.includes('youtube.com/embed'), true);
@@ -251,8 +251,8 @@ describe('unalib', function(){
 
     it('deberia escapar texto normal para prevenir XSS', function(){
 
-      var textMsg = JSON.stringify({nombre: 'User', mensaje: 'Hello <b>world</b>', color: '#000'});
-      var result = JSON.parse(val.validateMessage(textMsg));
+      const textMsg = JSON.stringify({nombre: 'User', mensaje: 'Hello <b>world</b>', color: '#000'});
+      const result = JSON.parse(val.validateMessage(textMsg));
       
       assert.equal(result.mensaje, 'Hello &lt;b&gt;world&lt;/b&gt;');
 
@@ -260,10 +260,10 @@ describe('unalib', function(){
 
     it('deberia manejar mensajes vacios o invalidos', function(){
 
-      var result1 = JSON.parse(val.validateMessage(''));
+      const result1 = JSON.parse(val.validateMessage(''));
       assert.equal(result1.mensaje, '');
 
-      var result2 = JSON.parse(val.validateMessage(null));
+      const result2 = JSON.parse(val.validateMessage(null));
       assert.equal(result2.mensaje, '');
 
     });

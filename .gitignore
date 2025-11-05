@@ -45,11 +45,53 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# ===================================
+# Environment Variables & Secrets
+# ===================================
 .env
+.env.local
+.env.*.local
 .env.test
 .env.production
-.env.local
+.env.development
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Security sensitive files
+secrets/
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# ===================================
+# Documentation and Summaries (Local Only)
+# ===================================
+# Resúmenes y documentación de configuración local
+*SUMMARY*.md
+*RESUMEN*.md
+QUICK_START.md
+
+# README files de configuración interna
+.github/workflows/README.md
+.github/SECRETS_GUIDE.md
+.github/rulesets/README.md
+
+# Rulesets JSON (ya importados en GitHub)
+.github/rulesets/*.json
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
