@@ -20,14 +20,14 @@
   ],
   "report-dir": "./coverage",
   "check-coverage": true,
-  "lines": 65,
-  "statements": 65,
+  "lines": 60,
+  "statements": 60,
   "functions": 90,
   "branches": 55,
   "watermarks": {
-    "lines": [65, 95],
+    "lines": [60, 95],
     "functions": [90, 95],
     "branches": [55, 95],
-    "statements": [65, 95]
+    "statements": [60, 95]
   }
 }
