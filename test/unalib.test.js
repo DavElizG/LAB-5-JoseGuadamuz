@@ -227,11 +227,11 @@ describe('UNA Library - Validation Functions', function() {
 
     it('should handle multiple image formats', function() {
       const formats = ['.jpg', '.png', '.gif', '.webp'];
-      formats.forEach(format => {
+      for (const format of formats) {
         const url = `https://example.com/image${format}`;
         const result = val.getImageTag(url);
         expect(result).to.be.a('string');
-      });
+      }
     });
     
   });

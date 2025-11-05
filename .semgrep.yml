@@ -1,0 +1,84 @@
+---
+# Semgrep Configuration for UNA-Chat Project
+# https://semgrep.dev/docs/writing-rules/rule-syntax/
+
+rules:
+  # Custom rules for Node.js/Express security
+  - id: express-no-unsafe-cors
+    patterns:
+      - pattern: app.use(cors())
+      - pattern-not-inside: |
+          const corsOptions = {...}
+          app.use(cors(corsOptions))
+    message: "Unsafe CORS configuration detected. Always specify allowed origins."
+    languages: [javascript]
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-942: Overly Permissive CORS Policy"
+      owasp: "A5:2017-Broken Access Control"
+      
+  - id: socket-io-no-cors-wildcard
+    patterns:
+      - pattern: |
+          io(..., {
+            cors: {
+              origin: "*",
+              ...
+            }
+          })
+    message: "Socket.IO configured with wildcard CORS origin. Specify allowed origins explicitly."
+    languages: [javascript]
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-942"
+      
+  - id: detect-eval-usage
+    pattern: eval(...)
+    message: "Use of eval() is dangerous and should be avoided. Consider safer alternatives."
+    languages: [javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code"
+      owasp: "A1:2017-Injection"
+
+  - id: detect-sensitive-data-logging
+    patterns:
+      - pattern-either:
+          - pattern: console.log(..., $PASSWORD, ...)
+          - pattern: console.log(..., $TOKEN, ...)
+          - pattern: console.log(..., $SECRET, ...)
+          - pattern: console.error(..., $PASSWORD, ...)
+          - pattern: console.error(..., $TOKEN, ...)
+    message: "Potential logging of sensitive data detected. Avoid logging passwords, tokens, or secrets."
+    languages: [javascript]
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-532: Information Exposure Through Log Files"
+
+# Rulesets to include from Semgrep Registry
+# These are automatically loaded when using --config=auto
+# But can be explicitly specified here for clarity:
+# - p/security-audit
+# - p/owasp-top-ten
+# - p/nodejs
+# - p/express
+# - p/javascript
+
+# Paths to exclude from scanning
+paths:
+  exclude:
+    - "*.test.js"
+    - "*.spec.js"
+    - "test/**"
+    - "tests/**"
+    - "node_modules/**"
+    - "coverage/**"
+    - "dist/**"
+    - "build/**"
+    - ".git/**"
+    - "*.min.js"
+    - "*.bundle.js"

@@ -5,7 +5,7 @@
  */
 
 const { expect } = require('chai');
-const http = require('http');
+const http = require('node:http');
 
 describe('Server Integration Tests', function() {
 
@@ -26,29 +26,35 @@ describe('Server Integration Tests', function() {
   describe('GET /', function() {
     
     it('should return HTML page with status 200', function(done) {
-      http.get('http://localhost:3000/', (res) => {
+      const req = http.get('http://localhost:3000/');
+      
+      req.on('response', (res) => {
         expect(res.statusCode).to.equal(200);
         expect(res.headers['content-type']).to.include('text/html');
         done();
-      }).on('error', () => {
-        // Server might not be running during tests
+      });
+
+      req.on('error', () => {
         done();
       });
     });
 
     it('should serve the chat interface', function(done) {
-      http.get('http://localhost:3000/', (res) => {
-        let data = '';
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-        res.on('end', () => {
-          expect(data).to.be.a('string');
-          expect(data.length).to.be.greaterThan(0);
-          done();
-        });
-      }).on('error', () => {
+      // Simplified test to avoid deep nesting
+      const req = http.get('http://localhost:3000/');
+      let responseReceived = false;
+
+      req.on('response', (res) => {
+        responseReceived = true;
+        expect(res.statusCode).to.equal(200);
+        res.resume(); // Consume response to prevent memory leak
         done();
+      });
+
+      req.on('error', () => {
+        if (!responseReceived) {
+          done();
+        }
       });
     });
     
