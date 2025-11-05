@@ -118,7 +118,8 @@ module.exports = {
       rules: {
         'no-unused-expressions': 'off',
         'max-lines-per-function': 'off',
-        'sonarjs/no-duplicate-string': 'off'
+        'sonarjs/no-duplicate-string': 'off',
+        'max-nested-callbacks': ['error', 5] // BDD tests need more nesting
       }
     }
   ]
