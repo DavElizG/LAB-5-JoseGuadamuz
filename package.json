@@ -1,11 +1,48 @@
 {
-  "dependencies": {
-    "express": "*",
-    "mocha": "^10.2.0",
-    "socket.io": "*"
-  },
+  "name": "una-chat",
+  "version": "1.0.0",
+  "description": "UNA Chat - Secure real-time chat application",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha"
+    "dev": "NODE_ENV=development node server.js",
+    "test": "NODE_ENV=test mocha test/**/*.test.js --exit",
+    "test:watch": "NODE_ENV=test mocha test/**/*.test.js --watch",
+    "test:coverage": "NODE_ENV=test nyc --reporter=html --reporter=text --reporter=lcov mocha test/**/*.test.js --exit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "security:audit": "npm audit --audit-level=moderate",
+    "security:snyk": "snyk test",
+    "validate": "npm run lint && npm test && npm run security:audit",
+    "prepare": "node -e \"try { require('husky').install() } catch (e) {}\""
+  },
+  "keywords": [
+    "chat",
+    "websocket",
+    "socket.io",
+    "real-time",
+    "security"
+  ],
+  "author": "UNA-Chat Team",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "eslint": "^8.54.0",
+    "eslint-plugin-security": "^1.7.1",
+    "eslint-plugin-sonarjs": "^0.23.0",
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
+    "sinon": "^17.0.1",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }

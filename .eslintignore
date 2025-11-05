@@ -1,0 +1,22 @@
+# ESLint
+.eslintcache
+.eslintignore
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.min.js
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Documentation
+docs/
+
+# Dependencies
+package-lock.json
+yarn.lock
