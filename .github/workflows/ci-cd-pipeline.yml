@@ -318,11 +318,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Run Semgrep Scan
-        run: semgrep ci --config=auto --json --output=semgrep-report.json
+      - name: Run Semgrep Full Scan
+        run: |
+          semgrep ci \
+            --config=auto \
+            --config=p/security-audit \
+            --config=p/owasp-top-ten \
+            --config=p/nodejs \
+            --json \
+            --output=semgrep-report.json \
+            --verbose
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+          SEMGREP_REPO_NAME: DavElizG/LAB-5-JoseGuadamuz
+          SEMGREP_REPO_URL: https://github.com/DavElizG/LAB-5-JoseGuadamuz
+          SEMGREP_BRANCH: ${{ github.ref_name }}
+          SEMGREP_JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SEMGREP_COMMIT: ${{ github.sha }}
+          SEMGREP_PR_ID: ${{ github.event.pull_request.number }}
         continue-on-error: true
 
       - name: Upload Semgrep Report
@@ -339,8 +355,12 @@ jobs:
           echo "## 🔐 Semgrep Analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ Semgrep security scan completed" >> $GITHUB_STEP_SUMMARY
-          echo "- Security patterns checked" >> $GITHUB_STEP_SUMMARY
+          echo "- Security patterns checked (security-audit, owasp-top-ten, nodejs)" >> $GITHUB_STEP_SUMMARY
           echo "- Code quality analyzed" >> $GITHUB_STEP_SUMMARY
+          echo "- Results sent to Semgrep Dashboard" >> $GITHUB_STEP_SUMMARY
+          if [ -f semgrep-report.json ]; then
+            echo "- Findings: $(jq '.results | length' semgrep-report.json)" >> $GITHUB_STEP_SUMMARY
+          fi
 
   # ===================================
   # Job 6: SonarCloud Analysis
