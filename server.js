@@ -111,7 +111,7 @@ io.on('connection', function (socket) {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
   console.error(`[ERROR] ${new Date().toISOString()} - ${err.stack}`);
 
   // No exponer detalles del error en producción

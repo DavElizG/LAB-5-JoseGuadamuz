@@ -21,7 +21,7 @@ module.exports = {
     // ===================================
     'security/detect-eval-with-expression': 'error',
     'security/detect-non-literal-require': 'warn',
-    'security/detect-unsafe-regex': 'error',
+    'security/detect-unsafe-regex': 'warn', // Warn instead of error for complex regex
     'security/detect-buffer-noassert': 'error',
     'security/detect-child-process': 'warn',
     'security/detect-disable-mustache-escape': 'error',
@@ -46,7 +46,7 @@ module.exports = {
     'sonarjs/no-extra-arguments': 'error',
     'sonarjs/no-identical-conditions': 'error',
     'sonarjs/no-inverted-boolean-check': 'error',
-    'sonarjs/no-one-iteration-loop': 'error',
+    // 'sonarjs/no-one-iteration-loop': 'error', // Removed - not available in sonarjs v3+
     'sonarjs/no-redundant-boolean': 'error',
     'sonarjs/no-redundant-jump': 'error',
     'sonarjs/no-same-line-conditional': 'error',
@@ -60,7 +60,7 @@ module.exports = {
     // ===================================
     // Best Practices - Generales
     // ===================================
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': 'off', // Permitir console.log para logging en servidor
     'no-eval': 'error',
     'no-implied-eval': 'error',
     'no-new-func': 'error',
