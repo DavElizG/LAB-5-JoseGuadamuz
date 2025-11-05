@@ -6,14 +6,19 @@ module.exports = {
   is_valid_phone: function (phone) {
     // inicializacion lazy
     let isValid = false;
-    // expresion regular copiada de StackOverflow
-    const re = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/i;
+    // Regex optimizado: [+]* → +*, [(] → \(, {0,1} → ?, [0-9] → \d
+    const re = /^[+]*\(?\d{1,4}\)?[-\s./\d]*$/i;
 
     // validacion Regex
+    if (!phone) {
+      return false;
+    }
+    
     try {
       isValid = re.test(phone);
     } catch (e) {
-      // Error handling
+      console.error('Error validating phone:', e);
+      return false;
     }
     return isValid;
   },
@@ -25,10 +30,15 @@ module.exports = {
     const re = /(https?:)([/.\w\s-])*\.(?:jpg|jpeg|gif|png|bmp|webp|svg|tiff|ico)/i;
 
     // validacion Regex
+    if (!url) {
+      return false;
+    }
+    
     try {
       isValid = re.test(url);
     } catch (e) {
-      // Error handling
+      console.error('Error validating image URL:', e);
+      return false;
     }
     return isValid;
   },
@@ -40,10 +50,15 @@ module.exports = {
     const re = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})?$/i;
 
     // validacion Regex
+    if (!url) {
+      return false;
+    }
+    
     try {
       isValid = re.test(url);
     } catch (e) {
-      // Error handling
+      console.error('Error validating YouTube URL:', e);
+      return false;
     }
     return isValid;
   },
@@ -53,10 +68,15 @@ module.exports = {
     let isValid = false;
     const re = /^(?:https?:\/\/)?(?:www\.)?(?:vimeo\.com\/)(\d+)/i;
 
+    if (!url) {
+      return false;
+    }
+    
     try {
       isValid = re.test(url);
     } catch (e) {
-      // Error handling
+      console.error('Error validating Vimeo URL:', e);
+      return false;
     }
     return isValid;
   },
@@ -66,10 +86,15 @@ module.exports = {
     let isValid = false;
     const re = /(https?:)([/.\w\s-])*\.(?:mp4|webm|avi|mov|wmv|flv|mkv)/i;
 
+    if (!url) {
+      return false;
+    }
+    
     try {
       isValid = re.test(url);
     } catch (e) {
-      // Error handling
+      console.error('Error validating direct video URL:', e);
+      return false;
     }
     return isValid;
   },
