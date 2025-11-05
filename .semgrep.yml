@@ -82,3 +82,6 @@ paths:
     - ".git/**"
     - "*.min.js"
     - "*.bundle.js"
+    - "docs/evidences/**"
+    - "*-report.html"
+    - "**/*.html"
