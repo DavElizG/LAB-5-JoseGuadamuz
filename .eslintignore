@@ -5,6 +5,9 @@
 # Node modules
 node_modules/
 
+# Legacy code - TODO: Refactor to meet current standards
+libs/
+
 # Build outputs
 dist/
 build/
