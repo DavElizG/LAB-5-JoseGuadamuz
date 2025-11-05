@@ -1,48 +1,57 @@
 {
-  "name": "una-chat",
+  "name": "lab-5-unachat",
   "version": "1.0.0",
-  "description": "UNA Chat - Secure real-time chat application",
+  "description": "Secure chat application for LAB-5 with Socket.IO and Express.js",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "test": "mocha test/**/*.test.js --exit",
-    "test:watch": "mocha test/**/*.test.js --watch",
-    "test:coverage": "nyc --reporter=html --reporter=text --reporter=lcov mocha test/**/*.test.js --exit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "security:audit": "npm audit --audit-level=moderate",
-    "security:snyk": "snyk test",
-    "validate": "npm run lint && npm test && npm run security:audit",
-    "prepare": "node -e \"try { require('husky').install() } catch (e) {}\""
-  },
-  "keywords": [
-    "chat",
-    "websocket",
-    "socket.io",
-    "real-time",
-    "security"
-  ],
-  "author": "UNA-Chat Team",
-  "license": "MIT",
   "dependencies": {
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "socket.io": "^4.7.2",
-    "validator": "^13.11.0"
-  },
-  "devDependencies": {
-    "chai": "^4.3.10",
-    "eslint": "^8.54.0",
-    "eslint-plugin-security": "^1.7.1",
-    "eslint-plugin-sonarjs": "^0.23.0",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "*",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "sinon": "^17.0.1",
     "supertest": "^6.3.3"
   },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js",
+    "prod": "NODE_ENV=production node server.js",
+    "test": "mocha",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:check": "eslint --print-config server.js",
+    "lint:report": "eslint . --format html --output-file docs/evidences/eslint-report.html",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "security:check": "npm audit && npm run lint && npx @cyclonedx/cyclonedx-npm --output-format json --output-file ./docs/sbom-cyclonedx.json",
+    "security:scan": "snyk test",
+    "security:monitor": "snyk monitor",
+    "precommit": "npm run lint && npm run test"
+  },
+  "keywords": [
+    "chat",
+    "socket.io",
+    "express",
+    "security",
+    "una",
+    "eslint"
+  ],
+  "author": "LAB-5-UNACHAT Team",
+  "license": "MIT",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.6.0",
+    "eslint-plugin-security": "^3.0.1",
+    "eslint-plugin-sonarjs": "^3.0.5"
   }
 }
