@@ -37,7 +37,7 @@ module.exports = {
     // ===================================
     'sonarjs/cognitive-complexity': ['error', 15],
     'sonarjs/no-identical-functions': 'error',
-    'sonarjs/no-duplicate-string': ['warn', 3],
+    'sonarjs/no-duplicate-string': ['warn', { threshold: 3 }],
     'sonarjs/no-duplicated-branches': 'error',
     'sonarjs/no-all-duplicated-branches': 'error',
     'sonarjs/no-collection-size-mischeck': 'error',

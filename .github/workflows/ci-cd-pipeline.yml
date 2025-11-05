@@ -89,7 +89,7 @@ jobs:
   # Job 2: Linting - Análisis Estático
   # ===================================
   linting:
-    name: 🔍 Code Linting (ESLint)
+    name: Linting
     runs-on: ubuntu-latest
     needs: security-validation
     timeout-minutes: 10
@@ -138,7 +138,7 @@ jobs:
   # Job 3: Unit Tests - BDD Style
   # ===================================
   unit-tests:
-    name: 🧪 Unit Tests (BDD)
+    name: Unit Tests
     runs-on: ubuntu-latest
     needs: linting
     timeout-minutes: 15
@@ -224,7 +224,7 @@ jobs:
   # Job 4: SAST - Snyk Security Scan
   # ===================================
   security-sast-snyk:
-    name: 🔒 SAST - Snyk Security
+    name: Snyk Security Scan
     runs-on: ubuntu-latest
     needs: unit-tests
     timeout-minutes: 15
@@ -324,7 +324,7 @@ jobs:
   # Job 6: SonarCloud Analysis
   # ===================================
   sonarcloud-analysis:
-    name: 📊 SonarCloud Analysis
+    name: SonarQube Analysis
     runs-on: ubuntu-latest
     needs: unit-tests
     timeout-minutes: 15
