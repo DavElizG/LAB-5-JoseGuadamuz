@@ -41,8 +41,9 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=sha,prefix={{branch}}-
-            type=raw,value=development,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=development,enable=${{ github.ref == 'refs/heads/development' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
