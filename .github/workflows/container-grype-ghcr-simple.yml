@@ -17,7 +17,7 @@ jobs:
 
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository_owner }}/lab-5-joseguadamuz
+      IMAGE_NAME: ${{ format('{0}/{1}', toLower(github.repository_owner), 'lab-5-joseguadamuz') }}
 
     steps:
       - name: Checkout
@@ -36,8 +36,8 @@ jobs:
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           BRANCH_NAME="${{ github.ref_name }}"
           
-          # Normalize branch name for Docker tag (replace / with -)
-          SAFE_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          # Normalize branch name for Docker tag (lowercase, replace invalid chars with -)
+          SAFE_BRANCH=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/-/g')
           
           # Set tags
           echo "branch_tag=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${SAFE_BRANCH}" >> $GITHUB_OUTPUT
