@@ -1,25 +1,28 @@
-# ESLint
-.eslintcache
-.eslintignore
-
-# Node modules
+# .eslintignore
+# Dependencias
 node_modules/
 
-# Legacy code - TODO: Refactor to meet current standards
-libs/
-
-# Build outputs
+# Archivos de build
 dist/
 build/
 *.min.js
 
-# Test coverage
-coverage/
-.nyc_output/
+# Logs
+*.log
+npm-debug.log*
 
-# Documentation
-docs/
+# Archivos temporales
+.tmp/
+.cache/
 
-# Dependencies
-package-lock.json
-yarn.lock
+# Archivos de configuración específicos
+.env
+.env.*
+
+# Documentación generada
+docs/sbom-cyclonedx.json
+docs/evidences/**
+*-report.html
+
+# Archivos específicos que no necesitan linting
+index.html
