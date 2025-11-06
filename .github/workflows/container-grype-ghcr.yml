@@ -1,0 +1,98 @@
+name: Build and Scan (Grype) - GitHub Container Registry
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+  workflow_dispatch:
+
+jobs:
+  build_scan_push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ toLower(github.repository) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=development,enable=${{ github.ref == 'refs/heads/development' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Install Grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
+            | sh -s -- -b /usr/local/bin
+
+      - name: Extract primary image tag
+        id: image
+        run: |
+          PRIMARY_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "tag=$PRIMARY_TAG" >> $GITHUB_OUTPUT
+          echo "Using image: $PRIMARY_TAG"
+
+      - name: Grype scan - Table output
+        run: |
+          grype ${{ steps.image.outputs.tag }} -o table || true
+
+      - name: Grype scan - SARIF output
+        run: |
+          grype ${{ steps.image.outputs.tag }} -o sarif > grype.sarif || true
+
+      - name: Upload SARIF to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: grype.sarif
+
+      - name: Grype severity gate (fail on CRITICAL)
+        run: |
+          grype ${{ steps.image.outputs.tag }} --fail-on critical -o json > /dev/null
+
+      - name: Success summary
+        if: success()
+        run: |
+          echo "🎉 Build, Scan, and Push completed successfully!"
+          echo ""
+          echo "📦 Image pushed to GitHub Container Registry:"
+          echo "${{ steps.meta.outputs.tags }}" | while read tag; do
+            echo "  - $tag"
+          done
+          echo ""
+          echo "🔗 View packages: https://github.com/${{ github.repository }}/pkgs/container/${{ github.event.repository.name }}"
