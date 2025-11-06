@@ -34,6 +34,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Verify Docker Hub authentication
+        run: |
+          echo "Verifying Docker Hub login..."
+          docker info | grep Username || echo "Warning: Not logged in to Docker Hub"
+          echo "Testing repository access..."
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/unachat:development 2>/dev/null || echo "Repository may not exist yet or is not accessible"
+
       - name: Debug - Show built image
         run: |
           echo "Built images:"
@@ -67,5 +74,26 @@ jobs:
       - name: Push image (development and sha)
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          docker push $IMAGE
-          docker push $DOCKERHUB_REPO:sha-$SHORT_SHA
+          echo "Pushing images to Docker Hub..."
+          echo "Image 1: $IMAGE"
+          echo "Image 2: $DOCKERHUB_REPO:sha-$SHORT_SHA"
+          
+          # Push development tag
+          if docker push $IMAGE; then
+            echo "✅ Successfully pushed $IMAGE"
+          else
+            echo "❌ Failed to push $IMAGE"
+            echo "Please verify:"
+            echo "1. Docker Hub repository exists: https://hub.docker.com/r/$DOCKERHUB_REPO"
+            echo "2. DOCKERHUB_USERNAME matches the repository owner"
+            echo "3. DOCKERHUB_TOKEN has write permissions"
+            exit 1
+          fi
+          
+          # Push SHA tag
+          if docker push $DOCKERHUB_REPO:sha-$SHORT_SHA; then
+            echo "✅ Successfully pushed $DOCKERHUB_REPO:sha-$SHORT_SHA"
+          else
+            echo "❌ Failed to push $DOCKERHUB_REPO:sha-$SHORT_SHA"
+            exit 1
+          fi
