@@ -42,6 +42,7 @@
     "dev": "NODE_ENV=development node server.js",
     "prod": "NODE_ENV=production node server.js",
     "test": "mocha",
+    "test:coverage": "nyc --reporter=html --reporter=text --reporter=lcov mocha",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:check": "eslint --print-config server.js",
