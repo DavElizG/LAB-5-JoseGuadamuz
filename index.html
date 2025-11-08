@@ -1,20 +1,131 @@
 <!doctype html>
 <html>
   <head>
-    <title>Chat Socket.IO UNA</title>
+    <title>Chat Socket.IO UNA - Secure</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px;}
-      form button { width: 10%; background: rgb(130, 224, 255);  border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-      #messages { margin-bottom: 40px }
-      #nombre, #m { display: inline-block;}
-      #m {width: 69%; margin-right: 4px;}
-      #nombre {width: 20%}
+      body { font: 13px Helvetica, Arial; background-color: #f5f5f5; }
+      
+      /* Header con información de usuario */
+      #user-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      
+      #user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      
+      #user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid white;
+      }
+      
+      #user-name {
+        font-weight: bold;
+        font-size: 16px;
+      }
+      
+      #logout-btn {
+        background: rgba(255,255,255,0.2);
+        border: 1px solid white;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+      
+      #logout-btn:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+      }
+      
+      /* Chat container */
+      #chat-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        height: calc(100vh - 70px);
+        display: flex;
+        flex-direction: column;
+      }
+      
+      form { 
+        background: white; 
+        padding: 15px; 
+        position: fixed; 
+        bottom: 0; 
+        width: 100%; 
+        max-width: 1200px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        display: flex;
+        gap: 10px;
+      }
+      
+      form input { 
+        border: 2px solid #e0e0e0; 
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+      
+      form input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+      
+      form button { 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none; 
+        padding: 12px 30px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+      
+      form button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+      
+      #messages { 
+        list-style-type: none; 
+        margin: 0; 
+        padding: 20px;
+        margin-bottom: 80px;
+        overflow-y: auto;
+      }
+      
+      #messages li { 
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+      }
+      
+      #messages li:hover {
+        transform: translateX(5px);
+      }
+      
+      #m { flex: 1; }
       
       /* Estilos para contenido multimedia */
       #messages img {
@@ -37,90 +148,313 @@
         border-radius: 8px;
       }
       
-      /* Responsivo para pantallas pequeñas */
+      /* Estilo para mensajes de seguridad */
+      .security-warning {
+        color: #d32f2f;
+        font-weight: bold;
+        background-color: #ffebee;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border-left: 4px solid #d32f2f;
+      }
+      
+      /* Indicador de escritura */
+      #typing-indicator {
+        padding: 10px 20px;
+        font-style: italic;
+        color: #666;
+        min-height: 30px;
+      }
+      
+      /* Responsivo */
       @media (max-width: 600px) {
+        #user-header {
+          padding: 10px;
+        }
+        
+        #user-name {
+          font-size: 14px;
+        }
+        
+        form {
+          flex-direction: column;
+        }
+        
+        form button {
+          width: 100%;
+        }
+        
         #messages img,
         #messages iframe,
         #messages video {
           max-width: 300px;
           width: 100%;
         }
-        
-        #messages iframe {
-          height: 180px;
-        }
-      }
-      
-      /* Estilo para mensajes de seguridad */
-      .security-warning {
-        color: #d32f2f;
-        font-weight: bold;
-        background-color: #ffebee;
-        padding: 5px;
-        border-radius: 4px;
-        border-left: 4px solid #d32f2f;
       }
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
+    <!-- Header con información del usuario -->
+    <div id="user-header">
+      <div id="user-info">
+        <img id="user-avatar" src="" alt="Avatar">
+        <span id="user-name">Cargando...</span>
+      </div>
+      <button id="logout-btn" onclick="logout()">Cerrar Sesión</button>
+    </div>
+    
+    <!-- Contenedor del chat -->
+    <div id="chat-container">
+      <ul id="messages"></ul>
+      <div id="typing-indicator"></div>
+    </div>
+    
+    <!-- Formulario de envío -->
     <form action="">
-      <input id="nombre" autocomplete="off" placeholder="Username"/>
-      <input id="m" autocomplete="off" placeholder="Escriba un mensaje" /><button>Send</button>
+      <input id="m" autocomplete="off" placeholder="Escribe un mensaje o pega una imagen (Ctrl+V)..." />
+      <button type="button" id="file-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; margin-right: 5px;">
+        📎 Archivo
+      </button>
+      <input type="file" id="file-input" accept="image/*" style="display: none;">
+      <button type="submit">Enviar</button>
     </form>
+    
     <script src="https://cdn.socket.io/4.7.2/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
-
-    var colorHexTxt = "";
-
-    // genera colores aleatorios en hexadeximal
-    function getRandomColor() {
-        var letters = '0123456789ABCDEF';
-        var color = '#';
-        for (var i = 0; i < 6; i++) {
-          color += letters[Math.floor(Math.random() * 16)];
+      /**
+       * Sanitizar HTML para prevenir XSS
+       * @param {string} str - String a sanitizar
+       * @returns {string} String sanitizado
+       */
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+      
+      /**
+       * Validar URL de imagen
+       * @param {string} url - URL a validar
+       * @returns {boolean} True si es válida
+       */
+      function isValidImageUrl(url) {
+        if (!url) return false;
+        try {
+          const urlObj = new URL(url);
+          // Solo permitir HTTPS y dominios confiables
+          return urlObj.protocol === 'https:' && 
+                 (urlObj.hostname.endsWith('auth0.com') || 
+                  urlObj.hostname.endsWith('gravatar.com') ||
+                  urlObj.hostname.endsWith('googleusercontent.com'));
+        } catch {
+          return false;
         }
-
-        return color;
-     }
+      }
+      
+      // Cargar información del usuario
+      async function loadUserProfile() {
+        try {
+          const response = await fetch('/profile');
+          if (response.ok) {
+            const data = await response.json();
+            const user = data.user;
+            
+            // Actualizar UI con información del usuario (sanitizado)
+            document.getElementById('user-name').textContent = user.name || 'Usuario';
+            
+            // Validar URL de avatar antes de usarla
+            const avatarUrl = isValidImageUrl(user.picture) 
+              ? user.picture 
+              : 'https://via.placeholder.com/40';
+            document.getElementById('user-avatar').src = avatarUrl;
+            
+            // Retornar datos del usuario
+            return user;
+          } else {
+            console.error('Error cargando perfil');
+            globalThis.location.href = '/login';
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          globalThis.location.href = '/login';
+        }
+      }
+      
+      // Función para cerrar sesión
+      function logout() {
+        globalThis.location.href = '/logout';
+      }
 
       $(function () {
-        var socket = io();
-
-        // emite evento al servidor
+        let currentUser = null;
+        let socket = null;
         
-        $('form').submit(function(){
-            var nombreTxt = $('#nombre').val() || "Anomimo";
-            var mensajeTxt = $('#m').val();
-
-            if (colorHexTxt == "") {
-                colorHexTxt = getRandomColor();
+        // Cargar perfil y luego conectar socket
+        loadUserProfile().then(user => {
+          currentUser = user;
+          
+          // Conectar Socket.IO
+          socket = io({
+            auth: {
+              userId: user.id,
+              userName: user.name
             }
-
-            var jsonMsg = { nombre: nombreTxt, mensaje: mensajeTxt, color: colorHexTxt };
+          });
+          
+          // Manejar errores de conexión
+          socket.on('connect_error', (error) => {
+            console.error('Error de conexión:', error.message);
+            if (error.message.includes('No autorizado')) {
+              alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+              globalThis.location.href = '/login';
+            }
+          });
+          
+          // Manejar conexión exitosa
+          socket.on('connect', () => {
+            console.log('Conectado al chat');
+          });
+          
+          // Botón de adjuntar archivo
+          $('#file-btn').click(function() {
+            $('#file-input').click();
+          });
+          
+          // Manejar selección de archivo
+          $('#file-input').change(function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+              uploadImage(file);
+            }
+          });
+          
+          // Manejar pegar desde portapapeles
+          $('#m').on('paste', function(e) {
+            const items = e.originalEvent.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+              if (items[i].type.indexOf('image') !== -1) {
+                e.preventDefault();
+                const blob = items[i].getAsFile();
+                uploadImage(blob);
+                break;
+              }
+            }
+          });
+          
+          // Función para subir imagen (convertir a base64 y enviar)
+          function uploadImage(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              const base64 = event.target.result;
+              
+              const jsonMsg = { 
+                nombre: currentUser.name, 
+                mensaje: base64,
+                userId: currentUser.id,
+                picture: currentUser.picture
+              };
+              
+              socket.emit('Evento-Mensaje-Server', JSON.stringify(jsonMsg));
+              $('#m').val('');
+            };
+            reader.readAsDataURL(file);
+          }
+          
+          // Emitir evento al servidor
+          $('form').submit(function(e){
+            e.preventDefault();
+            const mensajeTxt = $('#m').val();
+            
+            if (!mensajeTxt.trim()) {
+              return false;
+            }
+            
+            const jsonMsg = { 
+              nombre: currentUser.name, 
+              mensaje: mensajeTxt,
+              userId: currentUser.id,
+              picture: currentUser.picture
+            };
+            
             socket.emit('Evento-Mensaje-Server', JSON.stringify(jsonMsg));
             $('#m').val('');
             return false;
-        });
-
-        // ... (resto del código) ...
-
-        socket.on('Evento-Mensaje-Server', function(msg){
-            var msgJson = JSON.parse(msg);
-            var mensajeDisplay = "<b style='color:"+ msgJson.color +"'>" + msgJson.nombre + "</b>: ";
-            
-            // Verificar si es un mensaje de seguridad
-            if (msgJson.mensaje && msgJson.mensaje.includes('⚠️ Contenido bloqueado por seguridad')) {
-                mensajeDisplay += "<span class='security-warning'>" + msgJson.mensaje + "</span>";
-            } else {
-                mensajeDisplay += msgJson.mensaje;
+          });
+          
+          // Recibir mensajes del servidor
+          socket.on('Evento-Mensaje-Server', function(msg){
+            try {
+              const msgJson = JSON.parse(msg);
+              
+              // Crear elemento de lista de forma segura
+              const li = document.createElement('li');
+              
+              // Agregar avatar si está disponible y es válido
+              if (msgJson.picture && isValidImageUrl(msgJson.picture)) {
+                const img = document.createElement('img');
+                img.src = msgJson.picture;
+                img.style.cssText = 'width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 8px;';
+                li.appendChild(img);
+              }
+              
+              // Agregar nombre (bold)
+              const nameElement = document.createElement('b');
+              nameElement.textContent = msgJson.nombre;
+              li.appendChild(nameElement);
+              
+              // Agregar separador
+              li.appendChild(document.createTextNode(': '));
+              
+              // Verificar si es un mensaje de seguridad
+              if (msgJson.mensaje && msgJson.mensaje.includes('⚠️ Contenido bloqueado por seguridad')) {
+                const warningSpan = document.createElement('span');
+                warningSpan.className = 'security-warning';
+                warningSpan.textContent = msgJson.mensaje;
+                li.appendChild(warningSpan);
+              } 
+              // Verificar si es contenido multimedia SOLO si viene con tags específicos del servidor
+              else if (msgJson.mensaje && 
+                       (msgJson.mensaje.startsWith('<iframe') || 
+                        msgJson.mensaje.startsWith('<img') || 
+                        msgJson.mensaje.startsWith('<video'))) {
+                // El contenido ya fue sanitizado por el servidor (unalib.js)
+                // Solo renderizar si comienza exactamente con estos tags seguros
+                const mediaContainer = document.createElement('div');
+                // Validación adicional: solo permitir tags específicos
+                if (msgJson.mensaje.includes('youtube.com') || 
+                    msgJson.mensaje.includes('vimeo.com') ||
+                    msgJson.mensaje.match(/^<img src="(https?:|data:image)/i)) {
+                  mediaContainer.innerHTML = msgJson.mensaje;
+                  li.appendChild(mediaContainer);
+                } else {
+                  // Si no pasa la validación, mostrar como texto
+                  li.appendChild(document.createTextNode(msgJson.mensaje));
+                }
+              } 
+              else {
+                // Agregar mensaje normal (texto seguro)
+                li.appendChild(document.createTextNode(msgJson.mensaje));
+              }
+              
+              // Agregar a la lista
+              document.getElementById('messages').appendChild(li);
+              window.scrollTo(0, document.body.scrollHeight);
+            } catch (error) {
+              console.error('Error procesando mensaje:', error);
             }
-            
-            $('#messages').append($('<li>').html(mensajeDisplay));
-            window.scrollTo(0, document.body.scrollHeight);
+          });
+          
+          // Manejar errores del servidor
+          socket.on('error', function(errorMsg) {
+            alert('Error: ' + errorMsg);
+          });
+          
+          // Manejar desconexión
+          socket.on('disconnect', () => {
+            console.log('Desconectado del chat');
+          });
         });
-
       });
     </script>
   </body>

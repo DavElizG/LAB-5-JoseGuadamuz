@@ -5,7 +5,11 @@ const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const session = require('express-session');
 require('dotenv').config();
+
+// Auth0 and authentication
+const { authMiddleware, attachUser, requireAuth } = require('./middleware/auth.middleware');
 
 // Application libraries
 const validation = require('./libs/unalib');
@@ -22,9 +26,42 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ['\'self\''],
-      scriptSrc: ['\'self\'', '\'unsafe-inline\''], // Allow inline scripts for Socket.IO
+      scriptSrc: [
+        '\'self\'', 
+        '\'unsafe-inline\'',
+        'https://cdn.socket.io',
+        'https://code.jquery.com'
+      ],
       styleSrc: ['\'self\'', '\'unsafe-inline\''],
-      connectSrc: ['\'self\''] // Allow WebSocket connections
+      connectSrc: [
+        '\'self\'',
+        'ws://localhost:3000',
+        'wss://lab-5-joseguadamuz.onrender.com'
+      ],
+      imgSrc: [
+        '\'self\'',
+        'data:',
+        'https:',
+        'http:',
+        'https://*.auth0.com',
+        'https://*.gravatar.com',
+        'https://*.googleusercontent.com',
+        'https://*.ytimg.com',
+        'https://i.ytimg.com'
+      ],
+      frameSrc: [
+        '\'self\'',
+        'https://www.youtube.com',
+        'https://youtube.com',
+        'https://www.youtube-nocookie.com'
+      ],
+      mediaSrc: [
+        '\'self\'',
+        'https:',
+        'http:',
+        'data:',
+        'blob:'
+      ]
     }
   }
 }));
@@ -47,12 +84,25 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// JSON body parser with size limit
-app.use(require('express').json({ limit: '200kb' }));
+// JSON body parser with size limit - Aumentado para soportar imágenes base64
+app.use(require('express').json({ limit: '10mb' }));
 
-// root: presentar html
-app.get('/', function (req, res) {
+// Auth0 authentication middleware
+app.use(authMiddleware);
+
+// Attach user information to request
+app.use(attachUser);
+
+// root: presentar html (protegido - requiere autenticación)
+app.get('/', requireAuth, function (req, res) {
   res.sendFile(__dirname + '/index.html');
+});
+
+// Ruta de perfil de usuario
+app.get('/profile', requireAuth, function (req, res) {
+  res.json({
+    user: req.user
+  });
 });
 
 // escuchar una conexion por socket
@@ -84,9 +134,12 @@ io.on('connection', function (socket) {
         return;
       }
 
-      // Validación de longitud
-      if (msg.length > 500) {
-        socket.emit('error', 'Mensaje demasiado largo (máximo 500 caracteres)');
+      // Validación de longitud - Permitir más caracteres para imágenes base64
+      const maxLength = msg.includes('data:image') ? 5000000 : 500; // 5MB para imágenes, 500 chars para texto
+      if (msg.length > maxLength) {
+        socket.emit('error', msg.includes('data:image') 
+          ? 'Imagen demasiado grande (máximo 5MB)' 
+          : 'Mensaje demasiado largo (máximo 500 caracteres)');
         return;
       }
 
@@ -94,7 +147,10 @@ io.on('connection', function (socket) {
       const sanitizedMsg = validation.validateMessage(msg);
 
       // Log de seguridad
-      console.log(`[SECURITY] Mensaje procesado de ${socket.id}: ${sanitizedMsg.substring(0, 50)}...`);
+      const logMsg = sanitizedMsg.includes('data:image') 
+        ? '[IMAGE]' 
+        : sanitizedMsg.substring(0, 50);
+      console.log(`[SECURITY] Mensaje procesado de ${socket.id}: ${logMsg}...`);
 
       // volvemos a emitir el mismo mensaje
       io.emit('Evento-Mensaje-Server', sanitizedMsg);
