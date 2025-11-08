@@ -1,0 +1,28 @@
+# .eslintignore
+# Dependencias
+node_modules/
+
+# Archivos de build
+dist/
+build/
+*.min.js
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archivos temporales
+.tmp/
+.cache/
+
+# Archivos de configuración específicos
+.env
+.env.*
+
+# Documentación generada
+docs/sbom-cyclonedx.json
+docs/evidences/**
+*-report.html
+
+# Archivos específicos que no necesitan linting
+index.html
