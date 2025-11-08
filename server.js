@@ -124,14 +124,15 @@ app.use((err, _req, res, _next) => {
 
 // Iniciar servidor con logging mejorado
 http.listen(port, function () {
-  console.log('=========================================');
+  const separator = '=========================================';
+  console.log(separator);
   console.log('🚀 LAB-5-UNACHAT Server Iniciado');
-  console.log('=========================================');
+  console.log(separator);
   console.log(`📡 Puerto: ${port}`);
   console.log(`🔒 Modo: ${process.env.NODE_ENV || 'development'}`);
   console.log('🛡️  Seguridad: Helmet, CORS, Rate Limiting activados');
   console.log(`⏰ Timestamp: ${new Date().toISOString()}`);
-  console.log('=========================================');
+  console.log(separator);
 
   // Configuración de entorno recomendada
   if (!process.env.NODE_ENV) {
