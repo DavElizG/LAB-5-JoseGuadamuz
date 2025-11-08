@@ -26,8 +26,9 @@ module.exports = {
   is_valid_url_image: function (url) {
     // inicializacion lazy
     let isValid = false;
-    // expresion regular mejorada para soportar más formatos
+    // expresion regular mejorada para soportar más formatos y base64
     const re = /(https?:)([/.\w\s-])*\.(?:jpg|jpeg|gif|png|bmp|webp|svg|tiff|ico)/i;
+    const base64Re = /^data:image\/(jpeg|jpg|png|gif|bmp|webp|svg\+xml);base64,/i;
 
     // validacion Regex
     if (!url) {
@@ -35,7 +36,7 @@ module.exports = {
     }
     
     try {
-      isValid = re.test(url);
+      isValid = re.test(url) || base64Re.test(url);
     } catch (e) {
       console.error('Error validating image URL:', e);
       return false;

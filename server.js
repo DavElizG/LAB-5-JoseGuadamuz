@@ -7,6 +7,9 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// Auth0 and authentication
+const { authMiddleware, attachUser, requireAuth } = require('./middleware/auth.middleware');
+
 // Application libraries
 const validation = require('./libs/unalib');
 const app = require('express')();
@@ -22,9 +25,42 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ['\'self\''],
-      scriptSrc: ['\'self\'', '\'unsafe-inline\''], // Allow inline scripts for Socket.IO
+      scriptSrc: [
+        '\'self\'', 
+        '\'unsafe-inline\'',
+        'https://cdn.socket.io',
+        'https://code.jquery.com'
+      ],
       styleSrc: ['\'self\'', '\'unsafe-inline\''],
-      connectSrc: ['\'self\''] // Allow WebSocket connections
+      connectSrc: [
+        '\'self\'',
+        'ws://localhost:3000',
+        'wss://lab-5-joseguadamuz.onrender.com'
+      ],
+      imgSrc: [
+        '\'self\'',
+        'data:',
+        'https:',
+        'http:',
+        'https://*.auth0.com',
+        'https://*.gravatar.com',
+        'https://*.googleusercontent.com',
+        'https://*.ytimg.com',
+        'https://i.ytimg.com'
+      ],
+      frameSrc: [
+        '\'self\'',
+        'https://www.youtube.com',
+        'https://youtube.com',
+        'https://www.youtube-nocookie.com'
+      ],
+      mediaSrc: [
+        '\'self\'',
+        'https:',
+        'http:',
+        'data:',
+        'blob:'
+      ]
     }
   }
 }));
@@ -47,12 +83,25 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// JSON body parser with size limit
-app.use(require('express').json({ limit: '200kb' }));
+// JSON body parser with size limit - Aumentado para soportar imágenes base64
+app.use(require('express').json({ limit: '10mb' }));
 
-// root: presentar html
-app.get('/', function (req, res) {
+// Auth0 authentication middleware
+app.use(authMiddleware);
+
+// Attach user information to request
+app.use(attachUser);
+
+// root: presentar html (protegido - requiere autenticación)
+app.get('/', requireAuth, function (req, res) {
   res.sendFile(__dirname + '/index.html');
+});
+
+// Ruta de perfil de usuario
+app.get('/profile', requireAuth, function (req, res) {
+  res.json({
+    user: req.user
+  });
 });
 
 // escuchar una conexion por socket
@@ -84,9 +133,13 @@ io.on('connection', function (socket) {
         return;
       }
 
-      // Validación de longitud
-      if (msg.length > 500) {
-        socket.emit('error', 'Mensaje demasiado largo (máximo 500 caracteres)');
+      // Validación de longitud - Permitir más caracteres para imágenes base64
+      const DATA_IMAGE_PREFIX = 'data:image';
+      const maxLength = msg.includes(DATA_IMAGE_PREFIX) ? 5000000 : 500; // 5MB para imágenes, 500 chars para texto
+      if (msg.length > maxLength) {
+        socket.emit('error', msg.includes(DATA_IMAGE_PREFIX) 
+          ? 'Imagen demasiado grande (máximo 5MB)' 
+          : 'Mensaje demasiado largo (máximo 500 caracteres)');
         return;
       }
 
@@ -94,7 +147,10 @@ io.on('connection', function (socket) {
       const sanitizedMsg = validation.validateMessage(msg);
 
       // Log de seguridad
-      console.log(`[SECURITY] Mensaje procesado de ${socket.id}: ${sanitizedMsg.substring(0, 50)}...`);
+      const logMsg = sanitizedMsg.includes(DATA_IMAGE_PREFIX) 
+        ? '[IMAGE]' 
+        : sanitizedMsg.substring(0, 50);
+      console.log(`[SECURITY] Mensaje procesado de ${socket.id}: ${logMsg}...`);
 
       // volvemos a emitir el mismo mensaje
       io.emit('Evento-Mensaje-Server', sanitizedMsg);
@@ -124,14 +180,15 @@ app.use((err, _req, res, _next) => {
 
 // Iniciar servidor con logging mejorado
 http.listen(port, function () {
-  console.log('=========================================');
+  const separator = '=========================================';
+  console.log(separator);
   console.log('🚀 LAB-5-UNACHAT Server Iniciado');
-  console.log('=========================================');
+  console.log(separator);
   console.log(`📡 Puerto: ${port}`);
   console.log(`🔒 Modo: ${process.env.NODE_ENV || 'development'}`);
   console.log('🛡️  Seguridad: Helmet, CORS, Rate Limiting activados');
   console.log(`⏰ Timestamp: ${new Date().toISOString()}`);
-  console.log('=========================================');
+  console.log(separator);
 
   // Configuración de entorno recomendada
   if (!process.env.NODE_ENV) {
