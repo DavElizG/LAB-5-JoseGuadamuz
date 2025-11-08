@@ -367,7 +367,7 @@
             const mensajeTxt = $('#m').val();
             
             if (!mensajeTxt.trim()) {
-              return false;
+              return;
             }
             
             const jsonMsg = { 
@@ -379,7 +379,6 @@
             
             socket.emit('Evento-Mensaje-Server', JSON.stringify(jsonMsg));
             $('#m').val('');
-            return false;
           });
           
           // Recibir mensajes del servidor

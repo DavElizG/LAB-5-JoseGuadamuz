@@ -95,7 +95,7 @@ const passportConfig = {
  * @returns {void}
  */
 function requireAuth(req, res, next) {
-  if (!req.oidc || !req.oidc.isAuthenticated()) {
+  if (!req.oidc?.isAuthenticated()) {
     return res.status(401).json({ 
       error: 'No autorizado',
       message: 'Debes iniciar sesión para acceder a este recurso' 
@@ -113,7 +113,7 @@ function requireAuth(req, res, next) {
 function requireSocketAuth(socket, next) {
   const session = socket.request.session;
   
-  if (!session || !session.user) {
+  if (!session?.user) {
     const err = new Error('No autorizado - Debes iniciar sesión');
     err.data = { content: 'Por favor, inicia sesión para usar el chat' };
     return next(err);
@@ -130,7 +130,7 @@ function requireSocketAuth(socket, next) {
  * @returns {Object|null} User information or null
  */
 function getUserInfo(req) {
-  if (req.oidc && req.oidc.isAuthenticated()) {
+  if (req.oidc?.isAuthenticated()) {
     return req.oidc.user;
   }
   return null;
