@@ -6,35 +6,41 @@ module.exports = {
   is_valid_phone: function (phone) {
     // inicializacion lazy
     let isValid = false;
-    // expresion regular copiada de StackOverflow
-    const re = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/i;
+    // Regex optimizado: [+]* → +*, [(] → \(, {0,1} → ?, [0-9] → \d
+    const re = /^[+]*\(?\d{1,4}\)?[-\s./\d]*$/i;
 
     // validacion Regex
+    if (!phone) {
+      return false;
+    }
+    
     try {
       isValid = re.test(phone);
     } catch (e) {
-      console.log(e);
-    } finally {
-      return isValid;
+      console.error('Error validating phone:', e);
+      return false;
     }
-    // fin del try-catch block
+    return isValid;
   },
 
   is_valid_url_image: function (url) {
     // inicializacion lazy
     let isValid = false;
     // expresion regular mejorada para soportar más formatos
-    const re = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|gif|png|bmp|webp|svg|tiff|ico)/i;
+    const re = /(https?:)([/.\w\s-])*\.(?:jpg|jpeg|gif|png|bmp|webp|svg|tiff|ico)/i;
 
     // validacion Regex
+    if (!url) {
+      return false;
+    }
+    
     try {
       isValid = re.test(url);
     } catch (e) {
-      console.log(e);
-    } finally {
-      return isValid;
+      console.error('Error validating image URL:', e);
+      return false;
     }
-    // fin del try-catch block
+    return isValid;
   },
 
   is_valid_yt_video: function (url) {
@@ -44,14 +50,17 @@ module.exports = {
     const re = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})?$/i;
 
     // validacion Regex
+    if (!url) {
+      return false;
+    }
+    
     try {
       isValid = re.test(url);
     } catch (e) {
-      console.log(e);
-    } finally {
-      return isValid;
+      console.error('Error validating YouTube URL:', e);
+      return false;
     }
-    // fin del try-catch block
+    return isValid;
   },
 
   // Función para validar videos de Vimeo
@@ -59,27 +68,35 @@ module.exports = {
     let isValid = false;
     const re = /^(?:https?:\/\/)?(?:www\.)?(?:vimeo\.com\/)(\d+)/i;
 
+    if (!url) {
+      return false;
+    }
+    
     try {
       isValid = re.test(url);
     } catch (e) {
-      console.log(e);
-    } finally {
-      return isValid;
+      console.error('Error validating Vimeo URL:', e);
+      return false;
     }
+    return isValid;
   },
 
   // Función para validar videos directos (mp4, webm, etc.)
   is_valid_direct_video: function (url) {
     let isValid = false;
-    const re = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|webm|avi|mov|wmv|flv|mkv)/i;
+    const re = /(https?:)([/.\w\s-])*\.(?:mp4|webm|avi|mov|wmv|flv|mkv)/i;
 
+    if (!url) {
+      return false;
+    }
+    
     try {
       isValid = re.test(url);
     } catch (e) {
-      console.log(e);
-    } finally {
-      return isValid;
+      console.error('Error validating direct video URL:', e);
+      return false;
     }
+    return isValid;
   },
 
   // Función general para validar cualquier tipo de video
@@ -100,11 +117,11 @@ module.exports = {
 
   getEmbeddedCode: function (url) {
     if (this.is_valid_yt_video(url)) {
-      var id = this.getYTVideoId(url);
-      return '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + id + '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+      const ytId = this.getYTVideoId(url);
+      return '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + ytId + '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
     } else if (this.is_valid_vimeo_video(url)) {
-      var id = this.getVimeoVideoId(url);
-      return '<iframe src="https://player.vimeo.com/video/' + id + '" width="560" height="315" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+      const vimeoId = this.getVimeoVideoId(url);
+      return '<iframe src="https://player.vimeo.com/video/' + vimeoId + '" width="560" height="315" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
     } else if (this.is_valid_direct_video(url)) {
       return '<video width="560" height="315" controls><source src="' + url + '" type="video/mp4">Tu navegador no soporta videos HTML5.</video>';
     }
@@ -112,18 +129,17 @@ module.exports = {
   },
 
   getImageTag: function (url) {
-    const tag = '<img src="' + url + '" style="max-height: 400px;max-width: 400px;">';
-    return tag;
+    return '<img src="' + url + '" style="max-height: 400px;max-width: 400px;">';
   },
 
   // Función para escapar HTML y prevenir XSS
   escapeHtml: function (unsafe) {
     return unsafe
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   },
 
   // Función para detectar intentos de inyección de scripts

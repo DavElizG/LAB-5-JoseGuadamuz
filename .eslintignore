@@ -21,6 +21,8 @@ npm-debug.log*
 
 # Documentación generada
 docs/sbom-cyclonedx.json
+docs/evidences/**
+*-report.html
 
 # Archivos específicos que no necesitan linting
 index.html
