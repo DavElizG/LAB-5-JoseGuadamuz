@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const session = require('express-session');
 require('dotenv').config();
 
 // Auth0 and authentication
