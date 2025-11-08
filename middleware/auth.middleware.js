@@ -26,7 +26,7 @@ const authMiddleware = auth(auth0Config);
  * @returns {void}
  */
 function requireAuth(req, res, next) {
-  if (!req.oidc || !req.oidc.isAuthenticated()) {
+  if (!req.oidc?.isAuthenticated()) {
     // Redirigir al login en lugar de devolver JSON
     return res.redirect('/login');
   }
@@ -54,8 +54,8 @@ function socketAuthMiddleware() {
     // Verificar si hay usuario autenticado en la sesión
     // Auth0 guarda el usuario en diferentes lugares según configuración
     const user = session.user || 
-                 (session.passport && session.passport.user) ||
-                 (session.openidTokens && session.openidTokens.claims);
+                 session.passport?.user ||
+                 session.openidTokens?.claims;
 
     if (!user) {
       const err = new Error('No autorizado - Debes iniciar sesión');
@@ -87,7 +87,7 @@ function socketAuthMiddleware() {
  * @returns {void}
  */
 function attachUser(req, res, next) {
-  if (req.oidc && req.oidc.isAuthenticated()) {
+  if (req.oidc?.isAuthenticated()) {
     req.user = {
       id: req.oidc.user.sub,
       name: req.oidc.user.name || req.oidc.user.nickname,
@@ -107,7 +107,7 @@ function attachUser(req, res, next) {
  * @returns {void}
  */
 function requireVerifiedEmail(req, res, next) {
-  if (!req.user || !req.user.emailVerified) {
+  if (!req.user?.emailVerified) {
     return res.status(403).json({
       error: 'Email no verificado',
       message: 'Por favor, verifica tu email antes de usar el chat'

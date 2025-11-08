@@ -135,9 +135,10 @@ io.on('connection', function (socket) {
       }
 
       // Validación de longitud - Permitir más caracteres para imágenes base64
-      const maxLength = msg.includes('data:image') ? 5000000 : 500; // 5MB para imágenes, 500 chars para texto
+      const DATA_IMAGE_PREFIX = 'data:image';
+      const maxLength = msg.includes(DATA_IMAGE_PREFIX) ? 5000000 : 500; // 5MB para imágenes, 500 chars para texto
       if (msg.length > maxLength) {
-        socket.emit('error', msg.includes('data:image') 
+        socket.emit('error', msg.includes(DATA_IMAGE_PREFIX) 
           ? 'Imagen demasiado grande (máximo 5MB)' 
           : 'Mensaje demasiado largo (máximo 500 caracteres)');
         return;
@@ -147,7 +148,7 @@ io.on('connection', function (socket) {
       const sanitizedMsg = validation.validateMessage(msg);
 
       // Log de seguridad
-      const logMsg = sanitizedMsg.includes('data:image') 
+      const logMsg = sanitizedMsg.includes(DATA_IMAGE_PREFIX) 
         ? '[IMAGE]' 
         : sanitizedMsg.substring(0, 50);
       console.log(`[SECURITY] Mensaje procesado de ${socket.id}: ${logMsg}...`);
